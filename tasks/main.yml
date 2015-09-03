@@ -1,0 +1,78 @@
+---
+
+- name: check for rvm installer
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  stat: path="{{ rvm_installer_dir }}/{{ rvm_installer_file }}"
+  register: rvm_installer
+
+- name: check for the rvm command
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  stat: path={{ rvm_cmd_path }}
+  register: rvm_cmd
+
+- name: check for the rvm gpg key
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: gpg --list-keys D39DC0E3
+  register: rvm_gpg_check
+  failed_when: false
+  changed_when: false
+
+- name: install rvm gpg key
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+  when: rvm_gpg_check.rc != 0
+
+- name: ensure installer dir exists
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  file: path={{ rvm_installer_dir }} mode=0700 state=directory
+
+- name: get or update rvm installer
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  get_url: url=https://get.rvm.io dest={{ rvm_installer_dir }}/{{ rvm_installer_file }} mode=0700
+  when: not rvm_installer.stat.exists or rvm_update
+
+- name: install rvm
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: "{{ rvm_installer_dir }}/{{ rvm_installer_file }} --auto-dotfiles"
+  when: not rvm_cmd.stat.exists
+
+- name: update rvm
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: "{{ rvm_cmd_path }} update"
+  when: rvm_update
+
+- name: find missing rubies
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: "{{ rvm_cmd_path }} {{ item.strip() }} do true"
+  changed_when: false
+  register: rvm_install_rubies
+  with_items: "{{ rvm_rubies.split(',') }}"
+  failed_when: false
+
+- name: install rubies
+  become: "{{ rvm_become }}"
+  become_method: sudo
+  become_user: "{{ rvm_user }}"
+  command: "{{ rvm_cmd_path }} install {{ item.item }}"
+  when: item.rc != 0
+  with_items: "{{ rvm_install_rubies.results }}"
+
+

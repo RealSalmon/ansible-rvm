@@ -1,0 +1,42 @@
+---
+language: python
+python: 2.7
+sudo: yes
+
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq python-pip
+  - sudo pip -q install ansible
+
+script:
+
+  # Test role
+  - >
+      ansible-playbook --connection local -i localhost, playbook.yml
+      | grep -q '.*failed=0'
+      || (echo 'Playbook failed' > /dev/stderr && exit 1)
+
+  # Test idempotency
+  - >
+      ansible-playbook --connection local -i localhost, playbook.yml
+      | grep -q '.*changed=0.*failed=0'
+      || (echo 'Idempotency check failed' > /dev/stderr && exit 1)
+
+  # Test rvm command
+  - >
+    source ~/.profile && which rvm
+    | grep -q $HOME/.rvm/bin/rvm
+    || (echo 'Test for rvm commad failed' > /dev/stderr && exit 1)
+
+  # Test ruby command
+  - >
+      rvm use ruby-head > /dev/null && which ruby
+      | grep -q $HOME/.rvm/rubies
+      || (echo 'Test for ruby command failed' > /dev/stderr && exit 1)
+
+  # Test jruby command
+  - >
+      rvm use jruby > /dev/null && which jruby
+      | grep -q $HOME/.rvm/rubies
+      || (echo 'Test for jruby command failed' > /dev/stderr && exit 1)
+

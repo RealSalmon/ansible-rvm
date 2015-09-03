@@ -1,0 +1,5 @@
+---
+- hosts: all
+  vars:
+    rvm_rubies: ruby-head,jruby
+  roles: [./]

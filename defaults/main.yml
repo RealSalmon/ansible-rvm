@@ -1,0 +1,8 @@
+---
+rvm_user: "{{ ansible_ssh_user }}"
+rvm_become: true
+rvm_rubies: ruby-head
+rvm_update: false
+rvm_cmd_path: ~{{ rvm_user }}/.rvm/bin/rvm
+rvm_installer_dir: ~{{ rvm_user}}/bin
+rvm_installer_file: rvm-installer.sh
