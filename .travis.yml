@@ -7,6 +7,8 @@ install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-pip
   - sudo pip -q install ansible
+  - rm -rf $HOME/.rvm $HOME/.rvmrc
+  - echo rvm_auto_reload_flag=2 >> ~/.rvmrc
 
 script:
 
@@ -24,7 +26,7 @@ script:
 
   # Test rvm command
   - >
-    source ~/.profile && which rvm
+    source ~/.profile > /dev/null && which rvm
     | grep -q $HOME/.rvm/bin/rvm
     || (echo 'Test for rvm commad failed' > /dev/stderr && exit 1)
 

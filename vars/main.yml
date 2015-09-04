@@ -1,2 +1,2 @@
 ---
-# vars file for ansible-rvm
+rvm_cmd_path: "{{ rvm_install_path }}/bin/rvm"
