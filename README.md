@@ -12,12 +12,11 @@ Requirements
 Role Variables
 --------------
 - rvm_user: "{{ ansible_ssh_user }}"
-- rvm_become: true
-- rvm_rubies: "ruby-head"
+- rvm_rubies: ruby-head
 - rvm_update: false
-- rvm_cmd_path: "~{{ rvm_user }}/.rvm/bin/rvm"
-- rvm_installer_dir: "~{{ rvm_user}}/bin"
-- rvm_installer_file: "rvm-installer.sh"
+- rvm_install_path: ~{{ rvm_user }}/.rvm
+- rvm_installer_dir: ~{{ rvm_user }}/bin
+- rvm_installer_file: rvm-installer.sh
 
 Dependencies
 ------------
@@ -27,11 +26,10 @@ Example Playbook
 ----------------
     ---
     - hosts: all
-      vars:
-        rvm_user: joeuser
       roles:
         - RealSalmon.rvm-prerequisites
-        - RealSalmon.rvm
+        - {role: RealSalmon.rvm, become: true, become_method: sudo, rvm_user: joeuser}
+        - {role: RealSalmon.rvm, become: true, become_method: sudo, rvm_user: jrubyguy, rubies: "ruby-head,jruby"}
 
 License
 -------
